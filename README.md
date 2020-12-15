@@ -2,18 +2,29 @@
 
 Slash Router is a lightweight framework for handling Discord Interactions over HTTP POSTs, providing with a easy to use Router that can be plug into [Opine](https://deno.land/x/opine).
 
+-   Easily pluggable to Opine App
+-   Utility function to verify Interaction
+-   Types for Interactions/Slash Commands API
+
 ## Getting started
 
-### Requirements
+### Verification
 
--   Have Deno installed
--   A WebServer (or VPS/VM) with SSL
+Request Verification is handled by the Router automatically, but if you're making a custom implementation using some other framework, try out `verify` method exported from `mod.ts`!
 
-Note: SSL is requirement for Discord Interactions Endpoint. If you are running this locally, make sure to secure your webserver i.e. it should use `https`.
+-   `async verify(rawBody: Buffer | Uint8Array | string, signature: string, timestamp: string, clientPublicKey: string`
+    -   rawBody: Raw payload sent by Discord in Request
+    -   signature: Signature present in headers of Request (`X-Signature-Ed25519`)
+    -   timestamp: Timestamp present in headers of Request (`X-Signature-Timestamp`)
+    -   clientPublicKey: Your Client's Public Key (present on Dev Portal)
 
-### Example
+### Examples
 
 Check examples in [this directory](./test).
+
+## Contributing
+
+You're always welcome to contribute! Please don't forget to check [Contributing guide!](CONTRIBUTING.md)
 
 ## License
 

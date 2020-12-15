@@ -1,3 +1,4 @@
+export * from "./src/verify.ts";
 export * from "./src/slash_router.ts";
 export {
     InteractionResponseType,

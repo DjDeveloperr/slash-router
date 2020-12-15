@@ -5,10 +5,9 @@ import {
     InteractionPayload,
     InteractionType,
     InteractionResponseType,
-    verify,
-    Buffer,
     RESTManager,
 } from "../deps.ts";
+import { verify } from "./verify.ts";
 
 export interface SlashRouterOptions {
     app: Opine;
@@ -16,19 +15,7 @@ export interface SlashRouterOptions {
     endpoint?: string;
 }
 
-export async function verifyKey(
-    rawBody: Buffer,
-    signature: string,
-    timestamp: string,
-    clientPublicKey: string
-): Promise<boolean> {
-    return await verify(
-        signature,
-        Buffer.concat([Buffer.from(timestamp, "utf-8"), rawBody]),
-        clientPublicKey
-    );
-}
-
+/** Router to initialize Interactions Endpoint and Handler (Opine) */
 export class SlashRouter {
     app: Opine;
     key: string;
@@ -61,8 +48,8 @@ export class SlashRouter {
         const timestamp = req.headers.get("x-signature-timestamp") ?? "";
 
         try {
-            const isVerified = await verifyKey(
-                Buffer.from((req as any).__parsed),
+            const isVerified = await verify(
+                (req as any).__parsed,
                 signature,
                 timestamp,
                 this.key
