@@ -4,7 +4,9 @@ import { PUB_KEY } from "./config.ts";
 
 const app = opine();
 
-const router = SlashRouter.init({
+class MySlashRouter extends SlashRouter {}
+
+new MySlashRouter({
     app,
     key: PUB_KEY,
 });

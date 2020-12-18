@@ -5,9 +5,8 @@ import {
     InteractionPayload,
     InteractionType,
     InteractionResponseType,
-    RESTManager,
 } from "../deps.ts";
-import { verify } from "./verify.ts";
+import { verify as verifyKey } from "./verify.ts";
 
 export interface SlashRouterOptions {
     app: Opine;
@@ -15,32 +14,23 @@ export interface SlashRouterOptions {
     endpoint?: string;
 }
 
-/** Router to initialize Interactions Endpoint and Handler (Opine) */
 export class SlashRouter {
     app: Opine;
     key: string;
     apiEndpoint: string;
-    rest: RESTManager;
 
     constructor(options: SlashRouterOptions) {
         this.app = options.app;
         this.apiEndpoint = options.endpoint ?? "/api/interactions";
         this.key = options.key;
 
-        this.rest = new RESTManager();
         this._setup();
     }
 
     private _setup() {
         this.app.post(this.apiEndpoint, (req, res) =>
-            this.handleRequest(req, res)
+            this._handleSlash(req, res)
         );
-    }
-
-    /** Initialize Slash Router with Opine app */
-    static init(options: SlashRouterOptions): SlashRouter {
-        const router = new SlashRouter(options);
-        return router;
     }
 
     async verifyKey(req: Request): Promise<boolean> {
@@ -48,7 +38,7 @@ export class SlashRouter {
         const timestamp = req.headers.get("x-signature-timestamp") ?? "";
 
         try {
-            const isVerified = await verify(
+            const isVerified = await verifyKey(
                 (req as any).__parsed,
                 signature,
                 timestamp,
@@ -60,11 +50,10 @@ export class SlashRouter {
         }
     }
 
-    async handleRequest(req: Request, res: Response) {
+    private async _handleSlash(req: Request, res: Response) {
         let raw = new Uint8Array(
             parseInt(req.headers.get("content-length") ?? "NUL") ?? undefined
         );
-
         req.parsedBody = await req.body
             .read(raw)
             .then(() => new TextDecoder("utf-8").decode(raw))
@@ -94,15 +83,6 @@ export class SlashRouter {
             return res.json({
                 type: InteractionResponseType.PONG,
             });
-        } else if (data.type === InteractionType.APPLICATION_COMMAND) {
-            res.json({ code: 0 });
-            this.handleSlash(data);
-        } else {
-            return res.json({
-                code: 0,
-            });
         }
     }
-
-    async handleSlash(data: InteractionPayload) {}
 }

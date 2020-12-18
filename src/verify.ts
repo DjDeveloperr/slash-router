@@ -8,20 +8,21 @@ import { Buffer, verify as edverify } from "../deps.ts";
  * @param clientPublicKey Your Client's Public Key (present on Dev Portal)
  */
 export async function verify(
-    rawBody: Buffer | Uint8Array | string,
+    rawBody: string | Uint8Array | Buffer,
     signature: string,
     timestamp: string,
     clientPublicKey: string
 ): Promise<boolean> {
-    const raw =
-        rawBody instanceof Buffer
-            ? rawBody
-            : rawBody instanceof Uint8Array
-            ? Buffer.from(rawBody)
-            : Buffer.from(rawBody, "utf-8");
     return await edverify(
         signature,
-        Buffer.concat([Buffer.from(timestamp, "utf-8"), raw]),
+        Buffer.concat([
+            Buffer.from(timestamp, "utf-8"),
+            Buffer.from(
+                rawBody instanceof Uint8Array
+                    ? new TextDecoder().decode(rawBody)
+                    : rawBody
+            ),
+        ]),
         clientPublicKey
-    );
+    ).catch(() => false);
 }

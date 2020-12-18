@@ -1,2 +1,4 @@
 test/config.ts
 .vscode
+privkey.pem
+fullchain.pem
